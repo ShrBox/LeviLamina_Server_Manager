@@ -1,63 +1,39 @@
 # Changelog
 
-All notable changes to **LeviLamina Server Manager** will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes and updates to **LeviLamina Server Manager** are listed below.
 
 ---
 
-## [1.1.0] - 2026-09-28
+## Version 1.1.0 (2026-09-28)
 
-### 🚀 What's New
+This update focuses on making the addon store much more reliable, fixing search issues, preventing download failures, and making the download experience smoother.
 
-- **Live MCPEDL Community Search Engine**:
-  - Replaced the previous single-page local filter with real-time official MCPEDL API integration (`api.mcpedl.com/api/submissions?s=...`).
-  - Added full search indexing for thousands of community Bedrock addons, guns, furniture, backpacks, shaders, maps, and textures.
-  - Implemented smart category fallback: searching for mods never returns empty even if an orthogonal category filter is active.
-  - Added popular quick-search chips (Furniture, Backpacks, Weapons, Guns, Zombies, Pokémon, Shaders, Vehicles, SkyBlock).
+### What We Added
+- **Live MCPEDL Search**: The search bar now queries MCPEDL's live catalog directly. You can now search for any mod or addon (like guns, furniture, backpacks, shaders, or maps) and find real results right away, instead of only browsing whatever was on the first page.
+- **Quick-Search Chips**: Added one-click search chips for popular addon topics (Furniture, Backpacks, Weapons, Guns, Zombies, Shaders, Vehicles, and SkyBlock).
+- **New Download Progress Bar**: Replaced the small spinning wheel with a full animated progress bar. It shows you the progress percentage and download animation across all addon pages so you can see that your file is actively downloading.
+- **In-Tab Catalog Sync**: Added a "Check Updates & Sync" button at the top of the MCPEDL tab so you can refresh the catalog and get the latest uploads without restarting the app.
+- **Default Operator Cheats**: When creating a new server, operator permissions now have cheats enabled by default so you can use server commands right after joining.
 
-- **Unified Download & Install Loading Bar**:
-  - Created a brand-new `InstallButton` component with animated moving diagonal progress stripes (`download-bar-stripes`), progress track, percentage indicator, and animated download state.
-  - Unified the installation UI across the MCPEDL Portal, CurseForge, Extensions, and Addons pages.
-
-- **Direct In-Tab MCPEDL Sync**:
-  - Added a dedicated `Check Updates & Sync` (`تحديث ومزامنة الكتالوج`) button directly in the MCPEDL header to flush memory caches and pull the latest upstream submissions on demand.
-
-- **OP Cheats Enabled by Default**:
-  - Automatically configured default operator permissions to have cheat commands enabled upon server initialization.
-
----
-
-### 🐛 Bug Fixes & Improvements
-
-- **Fixed Download HTTP 403 Forbidden Error**:
-  - Replaced all obsolete `edge.mcpedl.com` links with authentic ForgeCDN download endpoints (`edge.forgecdn.net`).
-  - Implemented dynamic slug-based file resolution in `InstallMCPEDLItemLive`: if a package has multiple sub-files or generic links, the manager queries the official CDN file list and downloads authentic `.mcaddon` / `.mcpack` files.
-  - Added automatic download retry with fallback file resolution if an upstream link is stale.
-  - Added a dedicated `downloadClient` with a 10-minute timeout to ensure large addon packs (15MB–50MB+) download reliably without context deadline timeouts.
-
-- **Eliminated Duplicate Content on "Load More"**:
-  - Added strict key deduplication by item slug and ID across pagination requests, ensuring no cards or addons repeat when clicking "Load More".
-
-- **Clean App Exit & Process Termination**:
-  - Fixed background processes lingering after closing the application or uninstaller. Process trees and Windows Job Objects now cleanly terminate upon app exit.
-
-- **RAM Percentage & Progress Bar Alignment**:
-  - Fixed memory usage percentage calculation and ensured memory progress bars adhere to strict left-to-right (`dir="ltr"`) layout regardless of system locale.
-
-- **BDS Setup Validation**:
-  - Fixed Bedrock Dedicated Server ZIP validation and local cache resolution during initial server creation.
+### What We Fixed
+- **Fixed the "HTTP 403 Forbidden" Download Error**: Some addons would fail to install with a 403 error because of outdated download links. We updated the downloader to resolve the official ForgeCDN file mirrors directly and added automatic retries if a link ever expires.
+- **Fixed Download Timeouts on Large Addons**: Large addon packages (15MB to 50MB+) sometimes timed out after 15 seconds. The downloader now has a dedicated client with a 10-minute timeout so large worlds and heavy packs finish downloading reliably.
+- **No More Duplicate Cards on "Load More"**: Clicking "Load More" previously repeated some cards on screen. We added item deduplication so only new addons are appended to your list.
+- **Clean App Shutdown**: Addressed an issue where background processes (like the uninstaller or server helpers) could stay running in Task Manager after exiting. The manager now shuts down all related processes completely when closed.
+- **RAM Percentage & Progress Bar Alignment**: Fixed how memory percentage was calculated and ensured the progress bar displays correctly from left to right in both English and Arabic views.
+- **BDS Setup Checks**: Improved server setup validation so newly downloaded server archives are checked and cached properly.
 
 ---
 
-## [1.0.0] - 2026-09-28
+## Version 1.0.0 (2026-09-28)
 
-### 🚀 Initial Public Release
+The first public release of LeviLamina Server Manager!
 
-- Official `lip` integration for LeviLamina plugins and libraries.
-- Kernel-level process supervision using Windows Job Objects (`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`).
-- Accurate real-time telemetry (TPS & MSPT) via UDP RakNet ping and OS thread scheduling.
-- Transactional add-on engine for `.mcpack` and `.mcaddon` drag-and-drop installation.
-- World & backup manager with LevelDB inspector and scheduled ZIP archives.
-- Pre-flight diagnostics for UWP loopback exemption and Windows Firewall configuration.
+### Highlights
+- Clean desktop control panel to start, stop, and restart Bedrock Dedicated Server instances with LeviLamina.
+- Native `lip` package manager support to install and update LeviLamina plugins directly from the UI.
+- Live server telemetry showing actual TPS, MSPT, CPU, and RAM usage.
+- Drag-and-drop installer for `.mcaddon` and `.mcpack` files with automatic world configuration.
+- Built-in world manager and zip backup tool.
+- Windows Job Object integration to keep child server processes tied to the manager and prevent orphaned background tasks.
+- Multilingual support including English and Arabic.
