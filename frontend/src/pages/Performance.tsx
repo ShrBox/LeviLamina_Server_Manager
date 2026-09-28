@@ -65,23 +65,33 @@ export const Performance: React.FC<PerformanceProps> = ({ server, metrics }) => 
         </div>
 
         {/* Working Set RAM */}
-        <div className="bg-dark-850 p-5 rounded-2xl border border-dark-750 shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
-            <span className="flex items-center gap-1.5">
-              <HardDrive size={16} className="text-purple-400" /> {t('workingSetRam', 'Working Set RAM')}
-            </span>
-            <span className="font-mono text-purple-400 font-bold">{metrics.memoryMB.toFixed(0)} MB</span>
-          </div>
-          <div className="w-full bg-dark-800 h-2 rounded-full overflow-hidden">
-            <div 
-              className="bg-purple-400 h-full rounded-full transition-all duration-300"
-              style={{ width: `${Math.min((metrics.memoryMB / 2048) * 100, 100)}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-slate-400">
-            {t('processMemoryAlloc', 'Process memory allocation')}
-          </div>
-        </div>
+        {(() => {
+          const totalMemMB = metrics.totalSystemMemMB && metrics.totalSystemMemMB > 0 ? metrics.totalSystemMemMB : 16384;
+          const memPercent = totalMemMB > 0 ? (metrics.memoryMB / totalMemMB) * 100 : 0;
+          const totalMemGB = (totalMemMB / 1024).toFixed(1);
+          return (
+            <div className="bg-dark-850 p-5 rounded-2xl border border-dark-750 shadow-sm space-y-3">
+              <div className="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                <span className="flex items-center gap-1.5">
+                  <HardDrive size={16} className="text-purple-400" /> {t('workingSetRam', 'Working Set RAM')}
+                </span>
+                <span className="font-mono text-purple-400 font-bold">
+                  {metrics.memoryMB.toFixed(0)} MB ({memPercent < 0.1 && metrics.memoryMB > 0 ? '<0.1' : memPercent.toFixed(1)}%)
+                </span>
+              </div>
+              <div className="w-full bg-dark-800 h-2 rounded-full overflow-hidden" dir="ltr">
+                <div 
+                  className="bg-purple-400 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(Math.max(memPercent, metrics.memoryMB > 0 ? 1.5 : 0), 100)}%` }}
+                />
+              </div>
+              <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                <span>{t('processMemoryAlloc', 'Process memory allocation')}</span>
+                <span className="font-mono text-slate-300 font-medium">{totalMemGB} GB {t('totalSystemMemory', 'Total RAM')}</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Online Uptime */}
         <div className="bg-dark-850 p-5 rounded-2xl border border-dark-750 shadow-sm space-y-3">

@@ -17,7 +17,30 @@ var (
 	procGetProcessMemoryInfo = modpsapi.NewProc("GetProcessMemoryInfo")
 	modkernel32              = syscall.NewLazyDLL("kernel32.dll")
 	procGetProcessTimes      = modkernel32.NewProc("GetProcessTimes")
+	procGlobalMemoryStatusEx = modkernel32.NewProc("GlobalMemoryStatusEx")
 )
+
+type memoryStatusEx struct {
+	cbSize                  uint32
+	dwMemoryLoad            uint32
+	ullTotalPhys            uint64
+	ullAvailPhys            uint64
+	ullTotalPageFile        uint64
+	ullAvailPageFile        uint64
+	ullTotalVirtual         uint64
+	ullAvailVirtual         uint64
+	ullAvailExtendedVirtual uint64
+}
+
+func getTotalPhysicalMemoryMB() float64 {
+	var ms memoryStatusEx
+	ms.cbSize = uint32(unsafe.Sizeof(ms))
+	ret, _, _ := procGlobalMemoryStatusEx.Call(uintptr(unsafe.Pointer(&ms)))
+	if ret != 0 && ms.ullTotalPhys > 0 {
+		return float64(ms.ullTotalPhys) / (1024.0 * 1024.0)
+	}
+	return 16384.0
+}
 
 const processVMRead = 0x0010
 
@@ -172,13 +195,14 @@ func (pm *ProcessMonitor) GetMetrics() models.ServerMetrics {
 	realTPS, realMSPT := pm.supervisor.GetTickMetrics()
 
 	metrics := models.ServerMetrics{
-		Status:        status,
-		PID:           pid,
-		UptimeSeconds: uptime,
-		CPUPercent:    cpuPercent,
-		MemoryMB:      memMB,
-		TPS:           realTPS,
-		MSPT:          realMSPT,
+		Status:           status,
+		PID:              pid,
+		UptimeSeconds:    uptime,
+		CPUPercent:       cpuPercent,
+		MemoryMB:         memMB,
+		TotalSystemMemMB: getTotalPhysicalMemoryMB(),
+		TPS:              realTPS,
+		MSPT:             realMSPT,
 	}
 
 	if pid == 0 || (status != models.StatusOnline && status != models.StatusStarting) {

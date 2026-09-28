@@ -17,6 +17,7 @@ import {
   Coins,
   ShoppingBag,
   Flame,
+  Compass,
   Sparkles,
   Settings as SettingsIcon, 
   Info,
@@ -76,6 +77,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   if (enabledExtensions['curseforge']) {
     contentItems.push({ id: 'curseforge', label: t('extCurseForge', 'CurseForge'), icon: Flame });
+  }
+
+  if (enabledExtensions['mcpedl']) {
+    contentItems.push({ id: 'mcpedl', label: t('extMCPEDL', 'MCPEDL'), icon: Compass });
   }
 
   const navItems = [

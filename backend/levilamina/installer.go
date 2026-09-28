@@ -26,11 +26,17 @@ func NewLeviLaminaManager(lipClient *lip.LipClient) *LeviLaminaManager {
 }
 
 // IsInstalled checks if the modified server loader binary (bedrock_server_mod.exe)
-// exists in the target server directory.
+// or tooth_lock.json exists in the target server directory.
 func (lm *LeviLaminaManager) IsInstalled(serverPath string) bool {
 	modExe := filepath.Join(serverPath, "bedrock_server_mod.exe")
-	_, err := os.Stat(modExe)
-	return err == nil
+	if _, err := os.Stat(modExe); err == nil {
+		return true
+	}
+	lockPath := filepath.Join(serverPath, "tooth_lock.json")
+	if _, err := os.Stat(lockPath); err == nil {
+		return true
+	}
+	return false
 }
 
 // DetectVersion tries to detect LeviLamina version from tooth_lock.json, manifest, or server files
@@ -59,7 +65,7 @@ func (lm *LeviLaminaManager) DetectVersion(serverPath string) string {
 		}
 		if err := json.Unmarshal(data, &lock); err == nil {
 			for _, pkg := range lock.Packages {
-				if strings.EqualFold(pkg.Manifest.Tooth, "github.com/LiteLDev/LeviLamina") && pkg.Manifest.Version != "" {
+				if strings.Contains(strings.ToLower(pkg.Manifest.Tooth), "levilamina") && pkg.Manifest.Version != "" {
 					return pkg.Manifest.Version
 				}
 			}

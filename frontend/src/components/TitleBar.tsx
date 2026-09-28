@@ -88,6 +88,9 @@ export const TitleBar: React.FC<TitleBarProps> = ({
 
   const handleClose = () => {
     try {
+      if ((window as any).go?.backend?.App?.ExitApp) {
+        (window as any).go.backend.App.ExitApp();
+      }
       Quit();
     } catch (e) {
       console.warn('Quit not supported in browser environment', e);

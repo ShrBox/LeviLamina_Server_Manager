@@ -64,10 +64,28 @@ func (c *LipClient) FindLipPath(serverPath string) (string, bool) {
 
 	// 3. Check system PATH
 	if p, err := exec.LookPath("lip.exe"); err == nil {
-		return p, true
+		if fi, err := os.Stat(p); err == nil && fi.Size() > 0 {
+			return p, true
+		}
 	}
 	if p, err := exec.LookPath("lip"); err == nil {
-		return p, true
+		if fi, err := os.Stat(p); err == nil && fi.Size() > 0 {
+			return p, true
+		}
+	}
+
+	// 4. Common standard Windows installation paths
+	standardPaths := []string{
+		`C:\Program Files\lip\lip.exe`,
+		`C:\Program Files (x86)\lip\lip.exe`,
+	}
+	if localAppData := os.Getenv("LOCALAPPDATA"); localAppData != "" {
+		standardPaths = append(standardPaths, filepath.Join(localAppData, "Programs", "lip", "lip.exe"))
+	}
+	for _, sp := range standardPaths {
+		if fi, err := os.Stat(sp); err == nil && fi.Size() > 0 {
+			return sp, true
+		}
 	}
 
 	return "", false
@@ -166,14 +184,34 @@ func (c *LipClient) InstallLipBinary() (string, error) {
 
 	targetExe := filepath.Join(toolsDir, "lip.exe")
 
-	// Determine download URLs: dynamic latest asset, direct release asset, and mirror proxy
-	candidateURLs := []string{
-		resolveLipDownloadURL(),
-		"https://github.com/futrime/lip/releases/download/v0.34.8/lip-0.34.8-win-x64.zip",
-		"https://ghproxy.net/https://github.com/futrime/lip/releases/download/v0.34.8/lip-0.34.8-win-x64.zip",
+	// Fast Path 1: Check if targetExe already exists and is valid
+	if fi, err := os.Stat(targetExe); err == nil && fi.Size() > 1000 {
+		c.customLipPath = targetExe
+		return targetExe, nil
 	}
 
-	client := &http.Client{Timeout: 90 * time.Second}
+	// Fast Path 2: Check if lip is already available on the system
+	if existing, found := c.FindLipPath(""); found && existing != targetExe {
+		if err := copyLipFile(existing, targetExe); err == nil {
+			c.customLipPath = targetExe
+			return targetExe, nil
+		}
+		c.customLipPath = existing
+		return existing, nil
+	}
+
+	// Determine download URLs: prioritize high-speed mirror and direct release asset
+	candidateURLs := []string{
+		"https://ghproxy.net/https://github.com/futrime/lip/releases/download/v0.34.8/lip-0.34.8-win-x64.zip",
+		"https://github.com/futrime/lip/releases/download/v0.34.8/lip-0.34.8-win-x64.zip",
+	}
+
+	// Quick check for newer release URL with 2-second timeout
+	if latestURL := resolveLipDownloadURL(); latestURL != "" && latestURL != candidateURLs[1] {
+		candidateURLs = append([]string{latestURL}, candidateURLs...)
+	}
+
+	client := &http.Client{Timeout: 15 * time.Second}
 	var lastErr error
 	var body []byte
 
@@ -247,8 +285,29 @@ func (c *LipClient) InstallLipBinary() (string, error) {
 	return "", fmt.Errorf("lip.exe not found inside downloaded release archive")
 }
 
+func copyLipFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	return err
+}
+
 func resolveLipDownloadURL() string {
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 3 * time.Second}
 	req, err := http.NewRequest("GET", "https://api.github.com/repos/LiteLDev/lip/releases/latest", nil)
 	if err == nil {
 		req.Header.Set("User-Agent", "LeviLaminaServerManager/1.0")

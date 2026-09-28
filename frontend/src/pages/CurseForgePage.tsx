@@ -20,6 +20,7 @@ import {
 import { Api } from '../services/api';
 import { Server, CurseForgeCatalogItem } from '../types';
 import { useI18n } from '../i18n';
+import { InstallButton } from '../components/InstallButton';
 
 interface CurseForgePageProps {
   server: Server | null;
@@ -372,29 +373,13 @@ export const CurseForgePage: React.FC<CurseForgePageProps> = ({ server, onNaviga
               </div>
 
               <div className="pt-3 border-t border-dark-750 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleInstall(item)}
-                  disabled={isInstalling}
-                  className="flex-1 py-2 px-3 rounded-xl font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer shadow-md bg-orange-500 hover:bg-orange-600 text-slate-950 shadow-orange-500/20 disabled:opacity-50"
-                >
-                  {isInstalling ? (
-                    <>
-                      <RefreshCw size={13} className="animate-spin" />
-                      <span>{t('installing', 'Installing...')}</span>
-                    </>
-                  ) : item.isInstalled ? (
-                    <>
-                      <Check size={13} strokeWidth={3} />
-                      <span>{t('reinstallPack', 'Reinstall Pack')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download size={13} />
-                      <span>{t('installToServer', 'Install to Server')}</span>
-                    </>
-                  )}
-                </button>
+                <InstallButton
+                  isInstalling={isInstalling}
+                  isInstalled={item.isInstalled}
+                  onInstall={() => handleInstall(item)}
+                  variant="orange"
+                  className="flex-1"
+                />
               </div>
             </div>
           );

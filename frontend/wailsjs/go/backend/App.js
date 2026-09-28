@@ -118,6 +118,10 @@ export function EnableMod(arg1) {
   return window['go']['backend']['App']['EnableMod'](arg1);
 }
 
+export function ExitApp() {
+  return window['go']['backend']['App']['ExitApp']();
+}
+
 export function ExportAddon(arg1, arg2) {
   return window['go']['backend']['App']['ExportAddon'](arg1, arg2);
 }
@@ -164,6 +168,14 @@ export function GetExtensionsCatalog() {
 
 export function GetExtensionsOverview(arg1, arg2) {
   return window['go']['backend']['App']['GetExtensionsOverview'](arg1, arg2);
+}
+
+export function GetMCPEDLCatalogLive(arg1, arg2, arg3, arg4, arg5) {
+  return window['go']['backend']['App']['GetMCPEDLCatalogLive'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function GetMCPEDLItemFiles(arg1) {
+  return window['go']['backend']['App']['GetMCPEDLItemFiles'](arg1);
 }
 
 export function GetModConfig(arg1) {
@@ -264,6 +276,10 @@ export function InstallLip() {
 
 export function InstallLipPackage(arg1, arg2) {
   return window['go']['backend']['App']['InstallLipPackage'](arg1, arg2);
+}
+
+export function InstallMCPEDLItemLive(arg1, arg2, arg3, arg4) {
+  return window['go']['backend']['App']['InstallMCPEDLItemLive'](arg1, arg2, arg3, arg4);
 }
 
 export function InstallToolCoinCatalogItem(arg1, arg2) {
@@ -422,6 +438,10 @@ export function SetServerMemoryLimit(arg1, arg2) {
   return window['go']['backend']['App']['SetServerMemoryLimit'](arg1, arg2);
 }
 
+export function Shutdown(arg1) {
+  return window['go']['backend']['App']['Shutdown'](arg1);
+}
+
 export function StartServer(arg1) {
   return window['go']['backend']['App']['StartServer'](arg1);
 }
@@ -436,6 +456,10 @@ export function StopServer(arg1) {
 
 export function SyncBedrinthCatalog() {
   return window['go']['backend']['App']['SyncBedrinthCatalog']();
+}
+
+export function SyncMCPEDLCatalog() {
+  return window['go']['backend']['App']['SyncMCPEDLCatalog']();
 }
 
 export function ToggleAddonForWorld(arg1, arg2, arg3, arg4) {

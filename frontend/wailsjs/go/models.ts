@@ -808,6 +808,108 @@ export namespace models {
 	        this.binaryPath = source["binaryPath"];
 	    }
 	}
+	export class MCPEDLCatalogItem {
+	    id: string;
+	    slug: string;
+	    name: string;
+	    summary: string;
+	    author: string;
+	    version: string;
+	    category: string;
+	    thumbnailUrl: string;
+	    downloadUrl: string;
+	    downloadCount: string;
+	    rating: string;
+	    updatedDate: string;
+	    sizeBytes: number;
+	    sizeFormatted: string;
+	    type: string;
+	    isInstalled: boolean;
+	    tags: string[];
+	    fileCount: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MCPEDLCatalogItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.slug = source["slug"];
+	        this.name = source["name"];
+	        this.summary = source["summary"];
+	        this.author = source["author"];
+	        this.version = source["version"];
+	        this.category = source["category"];
+	        this.thumbnailUrl = source["thumbnailUrl"];
+	        this.downloadUrl = source["downloadUrl"];
+	        this.downloadCount = source["downloadCount"];
+	        this.rating = source["rating"];
+	        this.updatedDate = source["updatedDate"];
+	        this.sizeBytes = source["sizeBytes"];
+	        this.sizeFormatted = source["sizeFormatted"];
+	        this.type = source["type"];
+	        this.isInstalled = source["isInstalled"];
+	        this.tags = source["tags"];
+	        this.fileCount = source["fileCount"];
+	    }
+	}
+	export class MCPEDLCatalogResponse {
+	    items: MCPEDLCatalogItem[];
+	    totalCount: number;
+	    page: number;
+	    pageSize: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MCPEDLCatalogResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.items = this.convertValues(source["items"], MCPEDLCatalogItem);
+	        this.totalCount = source["totalCount"];
+	        this.page = source["page"];
+	        this.pageSize = source["pageSize"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class MCPEDLDownloadFile {
+	    name: string;
+	    fileName: string;
+	    downloadUrl: string;
+	    sizeFormatted: string;
+	    type: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MCPEDLDownloadFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.fileName = source["fileName"];
+	        this.downloadUrl = source["downloadUrl"];
+	        this.sizeFormatted = source["sizeFormatted"];
+	        this.type = source["type"];
+	    }
+	}
 	export class MarketplaceUpdateReport {
 	    totalKeysCount: number;
 	    catalogItemsCount: number;
@@ -1016,6 +1118,7 @@ export namespace models {
 	    pid: number;
 	    cpuPercent: number;
 	    memoryMB: number;
+	    totalSystemMemMB: number;
 	    uptimeSeconds: number;
 	    playerCount: number;
 	    maxPlayers: number;
@@ -1032,6 +1135,7 @@ export namespace models {
 	        this.pid = source["pid"];
 	        this.cpuPercent = source["cpuPercent"];
 	        this.memoryMB = source["memoryMB"];
+	        this.totalSystemMemMB = source["totalSystemMemMB"];
 	        this.uptimeSeconds = source["uptimeSeconds"];
 	        this.playerCount = source["playerCount"];
 	        this.maxPlayers = source["maxPlayers"];

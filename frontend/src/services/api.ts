@@ -38,7 +38,10 @@ import {
   ToolCoinCatalogResponse,
   MarketplaceUpdateReport,
   CurseForgeUpdateReport,
-  JoinHealthReport
+  JoinHealthReport,
+  MCPEDLCatalogItem,
+  MCPEDLDownloadFile,
+  MCPEDLCatalogResponse
 } from '../types';
 
 declare global {
@@ -997,6 +1000,33 @@ export const Api = {
   async installCurseForgeItemLive(serverId: string, modId: number, fileId: number, downloadUrl = '', fileName = ''): Promise<void> {
     if (getBackend()?.InstallCurseForgeItemLive) {
       await getBackend().InstallCurseForgeItemLive(serverId, modId, fileId, downloadUrl, fileName);
+    }
+  },
+
+  async getMCPEDLCatalogLive(query = '', category = 'all', sort = 'latest', page = 1, pageSize = 24): Promise<MCPEDLCatalogResponse> {
+    if (getBackend()?.GetMCPEDLCatalogLive) {
+      return await getBackend().GetMCPEDLCatalogLive(query, category, sort, page, pageSize);
+    }
+    return { items: [], totalCount: 0, page, pageSize };
+  },
+
+  async syncMCPEDLCatalog(): Promise<MCPEDLCatalogResponse> {
+    if (getBackend()?.SyncMCPEDLCatalog) {
+      return await getBackend().SyncMCPEDLCatalog();
+    }
+    return await this.getMCPEDLCatalogLive('', 'all', 'latest', 1, 24);
+  },
+
+  async getMCPEDLItemFiles(slug: string): Promise<MCPEDLDownloadFile[]> {
+    if (getBackend()?.GetMCPEDLItemFiles) {
+      return await getBackend().GetMCPEDLItemFiles(slug);
+    }
+    return [];
+  },
+
+  async installMCPEDLItemLive(serverId: string, slug: string, downloadUrl = '', fileName = ''): Promise<void> {
+    if (getBackend()?.InstallMCPEDLItemLive) {
+      await getBackend().InstallMCPEDLItemLive(serverId, slug, downloadUrl, fileName);
     }
   },
 

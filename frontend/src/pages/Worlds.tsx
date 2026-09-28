@@ -111,7 +111,7 @@ export const Worlds: React.FC<WorldsProps> = ({ server, worlds, onRefreshWorlds 
     levelName: '',
     gamemode: 'survival',
     difficulty: 'normal',
-    allowCheats: false,
+    allowCheats: true,
     pvp: true,
     hardcore: false,
     defaultPlayerPermission: 'member',
@@ -764,7 +764,6 @@ export const Worlds: React.FC<WorldsProps> = ({ server, worlds, onRefreshWorlds 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {[
-                    { key: 'allowCheats',         label: t('allowCheats', 'Allow Cheats'),                 desc: t('worlds.allowCheatsDesc', 'Enables commands like /gamemode, /tp, /give'),                  def: false, icon: Terminal },
                     { key: 'pvp',                 label: t('pvp', 'Player vs Player (PvP)'),               desc: t('worlds.pvpDesc', 'Allows combat and damage between players'),                            def: true,  icon: Sword },
                     { key: 'hardcore',            label: t('hardcore', 'Hardcore Mode'),                   desc: t('worlds.hardcoreDesc', 'Players become permanent spectators upon death'),                 def: false, icon: Skull },
                     { key: 'forceGamemode',       label: t('forceGamemode', 'Force Gamemode'),             desc: t('worlds.forceGamemodeDesc', 'Forces joining players into world default gamemode'),        def: false, icon: Lock },

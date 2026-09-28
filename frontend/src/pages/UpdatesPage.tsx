@@ -12,9 +12,7 @@ import {
   ExternalLink, 
   ChevronDown, 
   ChevronUp, 
-  ShoppingBag, 
   Flame,
-  ArrowRight,
   ShieldCheck,
   Zap
 } from 'lucide-react';
@@ -481,72 +479,6 @@ export const UpdatesPage: React.FC<UpdatesPageProps> = ({
             ))}
           </div>
         )}
-      </div>
-
-      {/* Extension Live Synchronization Cards */}
-      <div className="p-5 rounded-2xl bg-dark-900 border border-dark-750">
-        <div className="pb-3 mb-4 border-b border-white/[0.06] flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-bold text-white">Extensions Upstream Synchronization</h2>
-            <p className="text-xs text-slate-400">
-              Manage dynamic definition updates directly inside each extension's tab
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Marketplace Card */}
-          <div className="p-4 rounded-xl bg-dark-950/70 border border-dark-750 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                <ShoppingBag className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">Marketplace Addons Manager</h4>
-                <p className="text-xs text-slate-400">
-                  {marketplaceReport 
-                    ? `${marketplaceReport.totalKeysCount.toLocaleString()} Decryption Keys Synced • Engine Active`
-                    : 'Embedded Rustcoin Engine & PlayFab Live Catalog'
-                  }
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => onNavigatePage('toolcoin')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-800 hover:bg-dark-750 border border-white/10 text-amber-400 text-xs font-medium transition-all cursor-pointer"
-            >
-              Open & Sync
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* CurseForge Card */}
-          <div className="p-4 rounded-xl bg-dark-950/70 border border-dark-750 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
-                <Flame className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">CurseForge Extension</h4>
-                <p className="text-xs text-slate-400">
-                  {curseforgeReport 
-                    ? `${curseforgeReport.totalItemsCount} Bedrock Addons Synchronized`
-                    : 'CurseForge Bedrock Addon Catalog'
-                  }
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => onNavigatePage('curseforge')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-800 hover:bg-dark-750 border border-white/10 text-orange-400 text-xs font-medium transition-all cursor-pointer"
-            >
-              Open & Sync
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

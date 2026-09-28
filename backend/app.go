@@ -164,6 +164,18 @@ func (a *App) Shutdown(ctx context.Context) {
 	killBds := exec.Command("taskkill", "/F", "/IM", "bedrock_server.exe", "/T")
 	killBds.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000}
 	_ = killBds.Run()
+
+}
+
+// ExitApp completely terminates the application and all child processes.
+func (a *App) ExitApp() {
+	if a.ctx != nil {
+		a.Shutdown(a.ctx)
+	}
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		os.Exit(0)
+	}()
 }
 
 // BringToFront restores and focuses the window. Called when a second instance is launched.
@@ -1807,7 +1819,80 @@ func (a *App) InstallCurseForgeItemLive(serverID string, modID, fileID int, down
 		}
 		return err
 	}
+	if a.activityLogger != nil {
+		a.activityLogger.Log("MARKETPLACE", "Successfully installed '%s' to server '%s'.", filepath.Base(tempFile), s.Name)
+	}
 	return nil
 }
+
+// GetMCPEDLCatalogLive retrieves live community addon listings from MCPEDL.
+func (a *App) GetMCPEDLCatalogLive(query, category, sort string, page, pageSize int) (*models.MCPEDLCatalogResponse, error) {
+	return a.extMgr.GetMCPEDLCatalogLive(query, category, sort, page, pageSize)
+}
+
+// SyncMCPEDLCatalog clears cached MCPEDL pages and loads fresh upstream listings.
+func (a *App) SyncMCPEDLCatalog() (*models.MCPEDLCatalogResponse, error) {
+	return a.extMgr.SyncMCPEDLCatalog()
+}
+
+// GetMCPEDLItemFiles fetches all available download files for an MCPEDL addon.
+func (a *App) GetMCPEDLItemFiles(slug string) ([]models.MCPEDLDownloadFile, error) {
+	return a.extMgr.GetMCPEDLItemFiles(slug)
+}
+
+// InstallMCPEDLItemLive downloads and installs a pack directly from MCPEDL into the server.
+func (a *App) InstallMCPEDLItemLive(serverID, slug, downloadURL, fileName string) error {
+	s, ok := a.db.GetServer(serverID)
+	if !ok {
+		return fmt.Errorf("server not found")
+	}
+
+	if a.activityLogger != nil {
+		a.activityLogger.Log("MCPEDL", "Installing MCPEDL addon '%s' to server '%s'...", slug, s.Name)
+	}
+
+	if downloadURL == "" {
+		files, err := a.extMgr.GetMCPEDLItemFiles(slug)
+		if err != nil || len(files) == 0 {
+			return fmt.Errorf("no download files found for %s", slug)
+		}
+		downloadURL = files[0].DownloadURL
+		if fileName == "" {
+			fileName = files[0].FileName
+		}
+	}
+
+	tempFile, err := a.extMgr.DownloadMCPEDLItem(downloadURL, fileName)
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tempFile)
+
+	targetWorld := addons.ResolveWorldFolder(s.Path, "")
+	opts := addons.InstallOptions{
+		EnableBehavior: true,
+		EnableResource: true,
+		TargetWorld:    targetWorld,
+		CreateBackup:   false,
+	}
+
+	_, err = a.addonInstall.InstallAddon(s.Path, tempFile, opts)
+	if err != nil {
+		fallbackErr := a.extMgr.InstallToolCoinPackage(s.Path, tempFile)
+		if fallbackErr == nil {
+			if a.activityLogger != nil {
+				a.activityLogger.Log("MCPEDL", "Successfully installed '%s' to server '%s'.", filepath.Base(tempFile), s.Name)
+			}
+			return nil
+		}
+		return err
+	}
+
+	if a.activityLogger != nil {
+		a.activityLogger.Log("MCPEDL", "Successfully installed '%s' to server '%s'.", filepath.Base(tempFile), s.Name)
+	}
+	return nil
+}
+
 
 

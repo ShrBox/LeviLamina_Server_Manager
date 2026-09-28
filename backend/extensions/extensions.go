@@ -58,14 +58,15 @@ type packCacheEntry struct {
 }
 
 type ExtensionManager struct {
-	configDir   string
-	client      *http.Client
-	keysLock    sync.RWMutex
-	cachedKeys  []KeyEntry
-	keysLoaded  bool
-	tsvCatalog  []models.ToolCoinCatalogItem
-	packCache   sync.Map
-	catalog     *MarketplaceCatalog
+	configDir    string
+	client       *http.Client
+	mcpedlClient *MCPEDLClient
+	keysLock     sync.RWMutex
+	cachedKeys   []KeyEntry
+	keysLoaded   bool
+	tsvCatalog   []models.ToolCoinCatalogItem
+	packCache    sync.Map
+	catalog      *MarketplaceCatalog
 }
 
 func cleanMinecraftFormatting(text string) string {
@@ -83,9 +84,10 @@ func cleanMinecraftFormatting(text string) string {
 
 func NewExtensionManager(configDir string) *ExtensionManager {
 	return &ExtensionManager{
-		configDir: configDir,
-		client:    &http.Client{Timeout: 15 * time.Second},
-		catalog:   NewMarketplaceCatalog(configDir),
+		configDir:    configDir,
+		client:       &http.Client{Timeout: 15 * time.Second},
+		mcpedlClient: NewMCPEDLClient(),
+		catalog:      NewMarketplaceCatalog(configDir),
 	}
 }
 
@@ -98,6 +100,7 @@ func (m *ExtensionManager) loadConfig() ExtensionConfig {
 		Extensions: map[string]ExtensionState{
 			"toolcoin":   {Installed: false, Enabled: false},
 			"curseforge": {Installed: false, Enabled: false},
+			"mcpedl":     {Installed: false, Enabled: false},
 		},
 	}
 
@@ -129,6 +132,7 @@ func (m *ExtensionManager) GetExtensionsCatalog() []models.ExtensionManifest {
 
 	tcState := cfg.Extensions["toolcoin"]
 	cfState := cfg.Extensions["curseforge"]
+	mpState := cfg.Extensions["mcpedl"]
 
 	return []models.ExtensionManifest{
 		{
@@ -154,6 +158,18 @@ func (m *ExtensionManager) GetExtensionsCatalog() []models.ExtensionManifest {
 			IsEnabled:   cfState.Enabled,
 			Tags:        []string{"Community", "Mods", "Texture Packs", "Scripts"},
 			ItemCount:   len(cfPacks),
+		},
+		{
+			ID:          "mcpedl",
+			Name:        "MCPEDL Add-Ons Portal",
+			Description: "Discover and 1-click install community-crafted Bedrock mods, addons, texture packs, and maps directly from MCPEDL.",
+			Version:     "2.2.0",
+			Author:      "MCPEDL Community",
+			Icon:        "Compass",
+			IsInstalled: mpState.Installed,
+			IsEnabled:   mpState.Enabled,
+			Tags:        []string{"Add-Ons", "Bedrock", "Texture Packs", "Maps", "Community"},
+			ItemCount:   350,
 		},
 	}
 }
@@ -695,6 +711,81 @@ func (m *ExtensionManager) InstallCurseForgeItemLive(serverPath string, modID in
 	tempFile, err := m.DownloadCurseForgeItem(modID, fileID, downloadURL, fileName)
 	if err != nil {
 		return err
+	}
+	defer os.Remove(tempFile)
+
+	return m.InstallToolCoinPackage(serverPath, tempFile)
+}
+
+// GetMCPEDLCatalogLive retrieves community addons from MCPEDL with search, category filtering, and sorting
+func (m *ExtensionManager) GetMCPEDLCatalogLive(query, category, sort string, page, pageSize int) (*models.MCPEDLCatalogResponse, error) {
+	if m.mcpedlClient == nil {
+		m.mcpedlClient = NewMCPEDLClient()
+	}
+	return m.mcpedlClient.GetCatalogLive(query, category, sort, page, pageSize)
+}
+
+// SyncMCPEDLCatalog flushes cache and forces a live reload from upstream
+func (m *ExtensionManager) SyncMCPEDLCatalog() (*models.MCPEDLCatalogResponse, error) {
+	if m.mcpedlClient == nil {
+		m.mcpedlClient = NewMCPEDLClient()
+	}
+	m.mcpedlClient.ClearCache()
+	return m.mcpedlClient.GetCatalogLive("", "all", "latest", 1, 24)
+}
+
+// GetMCPEDLItemFiles inspects an MCPEDL submission detail page to list available pack files
+func (m *ExtensionManager) GetMCPEDLItemFiles(slug string) ([]models.MCPEDLDownloadFile, error) {
+	if m.mcpedlClient == nil {
+		m.mcpedlClient = NewMCPEDLClient()
+	}
+	return m.mcpedlClient.GetItemFiles(slug)
+}
+
+// DownloadMCPEDLItem fetches an addon file from MCPEDL CDN to a temporary file
+func (m *ExtensionManager) DownloadMCPEDLItem(downloadURL, fileName string) (string, error) {
+	if m.mcpedlClient == nil {
+		m.mcpedlClient = NewMCPEDLClient()
+	}
+	return m.mcpedlClient.DownloadItemFile(downloadURL, fileName)
+}
+
+// InstallMCPEDLItemLive downloads an MCPEDL addon pack and installs it directly to the server
+func (m *ExtensionManager) InstallMCPEDLItemLive(serverPath, slug, downloadURL, fileName string) error {
+	if strings.Contains(downloadURL, "edge.mcpedl.com") {
+		downloadURL = strings.ReplaceAll(downloadURL, "edge.mcpedl.com", "edge.forgecdn.net")
+	}
+
+	// If downloadURL is empty or points to a non-existent or generic pattern (8998/305/), resolve authentic files
+	if downloadURL == "" || strings.Contains(downloadURL, "8998/305/") {
+		files, err := m.GetMCPEDLItemFiles(slug)
+		if err == nil && len(files) > 0 {
+			downloadURL = files[0].DownloadURL
+			if fileName == "" {
+				fileName = files[0].FileName
+			}
+		}
+	}
+
+	tempFile, err := m.DownloadMCPEDLItem(downloadURL, fileName)
+	if err != nil {
+		// If initial download failed (e.g. HTTP 403 or broken link), resolve fresh files for the slug and retry
+		files, fErr := m.GetMCPEDLItemFiles(slug)
+		if fErr == nil && len(files) > 0 {
+			for _, file := range files {
+				if file.DownloadURL != "" && file.DownloadURL != downloadURL {
+					var retryErr error
+					tempFile, retryErr = m.DownloadMCPEDLItem(file.DownloadURL, file.FileName)
+					if retryErr == nil {
+						err = nil
+						break
+					}
+				}
+			}
+		}
+		if err != nil {
+			return err
+		}
 	}
 	defer os.Remove(tempFile)
 

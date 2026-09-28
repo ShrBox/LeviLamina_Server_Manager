@@ -17,7 +17,7 @@ ManifestDPIAware true
 !define INFO_PROJECTNAME    "LeviLaminaServerManager"
 !define INFO_COMPANYNAME    "LiteLDev"
 !define INFO_PRODUCTNAME    "LeviLamina Server Manager"
-!define INFO_PRODUCTVERSION "1.0.0"
+!define INFO_PRODUCTVERSION "1.1.0"
 !define INFO_COPYRIGHT      "Copyright 2026 LeviLamina Community"
 !define PRODUCT_EXECUTABLE  "LeviLaminaServerManager.exe"
 !define UNINST_KEY_NAME     "LeviLaminaServerManager"
@@ -311,8 +311,10 @@ FunctionEnd
 
 Function pg.OnClose
     MessageBox MB_YESNO|MB_ICONQUESTION "Cancel the installation?" IDNO pg.OnClose_No
+    ShowWindow $HWNDPARENT 0
     SendMessage $HWNDPARENT 0x0010 0 0 ; WM_CLOSE
     Quit
+    System::Call 'kernel32::ExitProcess(i 0)'
     pg.OnClose_No:
 FunctionEnd
 

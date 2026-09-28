@@ -577,8 +577,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div className="text-lg font-black text-slate-100 group-hover:text-purple-300 transition-colors">
               {metrics.memoryMB > 0 ? `${metrics.memoryMB.toFixed(0)} MB` : "0 MB"}
+              {metrics.memoryMB > 0 && memoryLimitMB > 0 && (
+                <span className="text-xs text-purple-300/80 font-normal ml-2 font-mono">
+                  ({((metrics.memoryMB / memoryLimitMB) * 100).toFixed(1)}%)
+                </span>
+              )}
             </div>
-            <div className="w-full bg-dark-950/80 h-1.5 rounded-full overflow-hidden mt-1.5 border border-white/[0.05]">
+            <div className="w-full bg-dark-950/80 h-1.5 rounded-full overflow-hidden mt-1.5 border border-white/[0.05]" dir="ltr">
               <div 
                 className="bg-purple-400 h-full rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(192,132,252,0.7)]"
                 style={{ width: `${Math.min(100, Math.max((metrics.memoryMB / memoryLimitMB) * 100, 2))}%` }}

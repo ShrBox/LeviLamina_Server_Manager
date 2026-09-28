@@ -34,6 +34,7 @@ import { Api } from '../services/api';
 import { Addon, AddonAnalysisResult, Server, World } from '../types';
 import { CustomSelect } from '../components/CustomSelect';
 import { useI18n } from '../i18n';
+import { InstallButton } from '../components/InstallButton';
 
 interface AddonsProps {
   server: Server | null;
@@ -608,14 +609,16 @@ export const Addons: React.FC<AddonsProps> = ({ server, worlds, onRefreshWorlds,
             >
               {t('cancel', 'Cancel')}
             </button>
-            <button
-              onClick={handleExecuteInstall}
-              disabled={installing}
-              className="px-5 py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold text-xs transition-all shadow-md shadow-brand-500/20 flex items-center gap-2"
-            >
-              {installing ? <RotateCw size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
-              {installing ? t('installing', 'Installing...') : t('installToAddon', 'Install Add-On')}
-            </button>
+            <div className="w-40">
+              <InstallButton
+                isInstalling={installing}
+                onInstall={handleExecuteInstall}
+                label={t('installToAddon', 'Install Add-On')}
+                installingLabel={t('downloadingInstalling', 'Downloading & Installing...')}
+                variant="brand"
+                size="md"
+              />
+            </div>
           </div>
         </div>
       )}

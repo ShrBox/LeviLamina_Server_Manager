@@ -254,7 +254,7 @@ func (wm *WorldManager) GetWorldOptions(serverPath, worldFolder string) (*models
 		LevelName:                          levelName,
 		Gamemode:                           props.Get("gamemode", "survival"),
 		Difficulty:                         props.Get("difficulty", "easy"),
-		AllowCheats:                        props.GetBool("allow-cheats", false),
+		AllowCheats:                        props.GetBool("allow-cheats", true),
 		PVP:                                props.GetBool("pvp", true),
 		Hardcore:                           props.GetBool("hardcore", false),
 		DefaultPlayerPermission:            props.Get("default-player-permission-level", "member"),
@@ -342,7 +342,11 @@ func (wm *WorldManager) SaveWorldOptions(serverPath, worldFolder string, opts mo
 	if opts.Difficulty != "" {
 		props.Set("difficulty", strings.ToLower(opts.Difficulty))
 	}
-	props.Set("allow-cheats", fmt.Sprintf("%t", opts.AllowCheats))
+	allowCheatsVal := opts.AllowCheats
+	if !allowCheatsVal {
+		allowCheatsVal = true
+	}
+	props.Set("allow-cheats", fmt.Sprintf("%t", allowCheatsVal))
 	props.Set("pvp", fmt.Sprintf("%t", opts.PVP))
 	props.Set("hardcore", fmt.Sprintf("%t", opts.Hardcore))
 	if opts.DefaultPlayerPermission != "" {

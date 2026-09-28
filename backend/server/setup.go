@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -85,45 +86,75 @@ func (se *ServerSetupEngine) AutomateServerSetup(ctx context.Context, serverPath
 	totalSteps := 4
 
 	// ---------------- Step 1: Download Bedrock Dedicated Server ----------------
-	progress(1, totalSteps, 10, "Downloading official Minecraft Bedrock Dedicated Server...")
-
-	// Dynamic resolution of latest BDS with reliable release fallbacks
-	bdsUrls := make([]string, 0, 3)
-	if dynamicUrl := resolveLatestBDSDownloadURL(ctx); dynamicUrl != "" {
-		bdsUrls = append(bdsUrls, dynamicUrl)
+	bdsExePath := filepath.Join(serverPath, "bedrock_server.exe")
+	bdsAlreadyPresent := false
+	if fi, err := os.Stat(bdsExePath); err == nil && fi.Size() > 10*1024*1024 {
+		bdsAlreadyPresent = true
+		progress(1, totalSteps, 25, "Bedrock Dedicated Server binary already present.")
+	} else {
+		progress(1, totalSteps, 10, "Downloading official Minecraft Bedrock Dedicated Server...")
 	}
-	bdsUrls = append(bdsUrls,
-		"https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.60.10.zip",
-		"https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.50.07.zip",
-	)
+
+	userHome, _ := os.UserHomeDir()
+	cacheDir := filepath.Join(userHome, ".llsm", "cache")
+	cacheZip := filepath.Join(cacheDir, "bds-cache.zip")
 
 	var bdsData []byte
-	var downloadErr error
 
-	client := &http.Client{Timeout: 120 * time.Second}
-	for _, url := range bdsUrls {
-		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-		if err != nil {
-			continue
-		}
-		// Crucial: Mojang CDN blocks generic Go-http-client
-		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-
-		resp, err := client.Do(req)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			bdsData, downloadErr = io.ReadAll(resp.Body)
-			resp.Body.Close()
-			if downloadErr == nil && len(bdsData) > 1024*1024 {
-				break // Successfully downloaded BDS
+	if !bdsAlreadyPresent {
+		// Fast Path 1: Check local disk cache
+		if fi, err := os.Stat(cacheZip); err == nil && fi.Size() > 20*1024*1024 {
+			if data, err := os.ReadFile(cacheZip); err == nil {
+				if _, zErr := zip.NewReader(bytes.NewReader(data), int64(len(data))); zErr == nil {
+					bdsData = data
+					progress(1, totalSteps, 25, "Loaded Bedrock Dedicated Server from local cache.")
+				}
 			}
 		}
-		if resp != nil {
-			resp.Body.Close()
+
+		// Fast Path 2: Download with strict validation if not cached
+		if len(bdsData) == 0 {
+			bdsUrls := make([]string, 0, 3)
+			if dynamicUrl := resolveLatestBDSDownloadURL(ctx); dynamicUrl != "" {
+				bdsUrls = append(bdsUrls, dynamicUrl)
+			}
+			bdsUrls = append(bdsUrls,
+				"https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.60.10.zip",
+				"https://www.minecraft.net/bedrockdedicatedserver/bin-win/bedrock-server-1.21.50.07.zip",
+			)
+
+			client := &http.Client{Timeout: 90 * time.Second}
+			for _, url := range bdsUrls {
+				req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+				if err != nil {
+					continue
+				}
+				req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+				resp, err := client.Do(req)
+				if err == nil && resp.StatusCode == http.StatusOK {
+					data, readErr := io.ReadAll(resp.Body)
+					resp.Body.Close()
+					if readErr == nil && len(data) > 20*1024*1024 {
+						// Validate zip integrity before accepting
+						if _, zErr := zip.NewReader(bytes.NewReader(data), int64(len(data))); zErr == nil {
+							bdsData = data
+							_ = os.MkdirAll(cacheDir, 0755)
+							_ = os.WriteFile(cacheZip, data, 0644)
+							break
+						}
+					}
+				} else if resp != nil {
+					resp.Body.Close()
+				}
+			}
 		}
 	}
 
 	// ---------------- Step 2: Extract BDS into Server Directory ----------------
-	if len(bdsData) > 0 {
+	if bdsAlreadyPresent {
+		progress(2, totalSteps, 50, "Bedrock Dedicated Server runtime files verified.")
+	} else if len(bdsData) > 0 {
 		progress(2, totalSteps, 35, "Extracting Bedrock Dedicated Server files...")
 		zr, err := zip.NewReader(bytes.NewReader(bdsData), int64(len(bdsData)))
 		if err != nil {
@@ -158,51 +189,103 @@ func (se *ServerSetupEngine) AutomateServerSetup(ctx context.Context, serverPath
 			_ = os.WriteFile(filepath.Join(serverPath, "permissions.json"), origPermissionsData, 0644)
 		}
 	} else {
-		// If direct Mojang CDN download was blocked by network, fallback to creating server runner placeholder
-		progress(2, totalSteps, 35, "Configuring server runtime...")
+		// If download failed and BDS is not present, check if bdsdown tool exists in server
+		bdsDownPath := filepath.Join(serverPath, "bdsdown.exe")
+		if _, err := os.Stat(bdsDownPath); err == nil {
+			progress(2, totalSteps, 40, "Downloading BDS via bdsdown tool...")
+			cmd := exec.CommandContext(ctx, bdsDownPath)
+			cmd.Dir = serverPath
+			_ = cmd.Run()
+		}
+		if _, err := os.Stat(bdsExePath); err == nil {
+			progress(2, totalSteps, 50, "BDS runtime initialized successfully.")
+		} else {
+			return fmt.Errorf("could not download Bedrock Dedicated Server from network. Please check your internet connection and retry.")
+		}
 	}
 
 	// ---------------- Step 3: Download & Install LeviLamina Loader ----------------
-	progress(3, totalSteps, 60, "Downloading LeviLamina mod loader from GitHub releases...")
+	hasLL := false
+	if _, err := os.Stat(filepath.Join(serverPath, "bedrock_server_mod.exe")); err == nil {
+		hasLL = true
+	}
+	if !hasLL {
+		if _, err := os.Stat(filepath.Join(serverPath, "tooth_lock.json")); err == nil {
+			hasLL = true
+		}
+	}
 
-	llAssetUrl, err := se.findLatestLeviLaminaAsset(ctx)
-	if err == nil && llAssetUrl != "" {
-		req, err := http.NewRequestWithContext(ctx, "GET", llAssetUrl, nil)
-		if err == nil {
-			req.Header.Set("User-Agent", "LeviLaminaServerManager/1.0")
-			resp, err := client.Do(req)
-			if err == nil && resp.StatusCode == http.StatusOK {
-				llData, err := io.ReadAll(resp.Body)
-				resp.Body.Close()
-				if err == nil && len(llData) > 0 {
-					progress(3, totalSteps, 75, "Extracting LeviLamina framework files...")
-					zr, err := zip.NewReader(bytes.NewReader(llData), int64(len(llData)))
-					if err == nil {
-						_ = security.ExtractZipSafely(zr, serverPath, 1024*1024*1024, true)
+	if hasLL {
+		progress(3, totalSteps, 75, "LeviLamina mod loader already installed and verified.")
+	} else {
+		progress(3, totalSteps, 60, "Downloading LeviLamina mod loader from GitHub releases...")
+
+		client := &http.Client{Timeout: 90 * time.Second}
+		llAssetUrl, err := se.findLatestLeviLaminaAsset(ctx)
+		if err == nil && llAssetUrl != "" {
+			req, err := http.NewRequestWithContext(ctx, "GET", llAssetUrl, nil)
+			if err == nil {
+				req.Header.Set("User-Agent", "LeviLaminaServerManager/1.0")
+				resp, err := client.Do(req)
+				if err == nil && resp.StatusCode == http.StatusOK {
+					llData, err := io.ReadAll(resp.Body)
+					resp.Body.Close()
+					if err == nil && len(llData) > 0 {
+						progress(3, totalSteps, 75, "Extracting LeviLamina framework files...")
+						zr, err := zip.NewReader(bytes.NewReader(llData), int64(len(llData)))
+						if err == nil {
+							_ = security.ExtractZipSafely(zr, serverPath, 1024*1024*1024, true)
+						}
 					}
+				} else if resp != nil {
+					resp.Body.Close()
 				}
-			} else if resp != nil {
-				resp.Body.Close()
 			}
 		}
 	}
 
 	// ---------------- Step 4: Setup LIP Package Manager ----------------
-	progress(4, totalSteps, 85, "Installing LIP package manager tool...")
-	_, _ = se.lipClient.InstallLipBinary()
-
-	// Copy lip.exe into server directory as well for convenience
-	userHome, _ := os.UserHomeDir()
-	appToolLip := filepath.Join(userHome, ".llsm", "tools", "lip.exe")
-	if _, err := os.Stat(appToolLip); err == nil {
-		serverLip := filepath.Join(serverPath, "lip.exe")
-		_ = copyFile(appToolLip, serverLip)
+	progress(4, totalSteps, 85, "Configuring LIP package manager...")
+	lipPath, found := se.lipClient.FindLipPath(serverPath)
+	if !found {
+		progress(4, totalSteps, 86, "Installing LIP package manager tool...")
+		var err error
+		lipPath, err = se.lipClient.InstallLipBinary()
+		if err != nil {
+			// Non-fatal, continue server configuration
+		}
 	}
 
-	// Final check: if bedrock_server_mod.exe is still missing, try lip install github.com/LiteLDev/LeviLamina
-	if _, err := os.Stat(filepath.Join(serverPath, "bedrock_server_mod.exe")); os.IsNotExist(err) {
+	// Copy lip.exe into server directory as well for convenience
+	if lipPath != "" {
+		serverLip := filepath.Join(serverPath, "lip.exe")
+		if _, err := os.Stat(serverLip); os.IsNotExist(err) {
+			_ = copyFile(lipPath, serverLip)
+		}
+	} else {
+		userHome, _ := os.UserHomeDir()
+		appToolLip := filepath.Join(userHome, ".llsm", "tools", "lip.exe")
+		if _, err := os.Stat(appToolLip); err == nil {
+			serverLip := filepath.Join(serverPath, "lip.exe")
+			_ = copyFile(appToolLip, serverLip)
+		}
+	}
+
+	// Final check: if neither bedrock_server_mod.exe nor tooth.json exists, install LeviLamina via LIP
+	hasMod := false
+	if _, err := os.Stat(filepath.Join(serverPath, "bedrock_server_mod.exe")); err == nil {
+		hasMod = true
+	}
+	if !hasMod {
+		if _, err := os.Stat(filepath.Join(serverPath, "tooth.json")); err == nil {
+			hasMod = true
+		}
+	}
+	if !hasMod {
 		progress(4, totalSteps, 90, "Finalizing LeviLamina setup via LIP...")
-		_, _ = se.lipClient.InstallPackage(ctx, serverPath, "github.com/LiteLDev/LeviLamina")
+		installCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		_, _ = se.lipClient.InstallPackage(installCtx, serverPath, "github.com/LiteLDev/LeviLamina")
+		cancel()
 	}
 
 	// Guard: Ensure level-name in server.properties is NEVER "Bedrock level"
@@ -227,6 +310,7 @@ func (se *ServerSetupEngine) AutomateServerSetup(ctx context.Context, serverPath
 		if props.Get("transport", "") == "" || strings.EqualFold(props.Get("transport", ""), "nethernet") {
 			props.Set("transport", "raknet")
 		}
+		props.Set("allow-cheats", "true")
 		_ = props.Save()
 	}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"os"
+	"time"
 	"unsafe"
 
 	"github.com/wailsapp/wails/v2"
@@ -64,9 +66,19 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 243, G: 245, B: 248, A: 255},
 		OnStartup:        app.Startup,
-		OnShutdown:       app.Shutdown,
+		OnShutdown: func(ctx context.Context) {
+			app.Shutdown(ctx)
+			go func() {
+				time.Sleep(200 * time.Millisecond)
+				os.Exit(0)
+			}()
+		},
 		OnBeforeClose: func(ctx context.Context) bool {
 			app.Shutdown(ctx)
+			go func() {
+				time.Sleep(300 * time.Millisecond)
+				os.Exit(0)
+			}()
 			return false
 		},
 		Bind: []interface{}{
@@ -97,4 +109,5 @@ func main() {
 		showNativeError("LeviLamina Server Manager - Runtime Error",
 			fmt.Sprintf("Application encountered an unrecoverable window/rendering error:\n\n%v\n\nIf Microsoft Edge WebView2 is not installed on this machine, please install the Microsoft Edge WebView2 Runtime.", err))
 	}
+	os.Exit(0)
 }

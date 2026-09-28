@@ -136,8 +136,9 @@ type ServerMetrics struct {
 	Status        ServerStatus `json:"status"`
 	PID           int          `json:"pid"`
 	CPUPercent    float64      `json:"cpuPercent"`
-	MemoryMB      float64      `json:"memoryMB"`
-	UptimeSeconds int64        `json:"uptimeSeconds"`
+	MemoryMB         float64      `json:"memoryMB"`
+	TotalSystemMemMB float64      `json:"totalSystemMemMB"`
+	UptimeSeconds    int64        `json:"uptimeSeconds"`
 	PlayerCount   int          `json:"playerCount"`
 	MaxPlayers    int          `json:"maxPlayers"`
 	TPS           *float64     `json:"tps"`  // nil if unavailable
@@ -455,6 +456,45 @@ type ToolCoinCatalogResponse struct {
 	TotalCount int                   `json:"totalCount"`
 	Page       int                   `json:"page"`
 	PageSize   int                   `json:"pageSize"`
+}
+
+// MCPEDLCatalogItem represents an in-app browsable Bedrock addon/mod from MCPEDL
+type MCPEDLCatalogItem struct {
+	ID            string   `json:"id"`
+	Slug          string   `json:"slug"`
+	Name          string   `json:"name"`
+	Summary       string   `json:"summary"`
+	Author        string   `json:"author"`
+	Version       string   `json:"version"`
+	Category      string   `json:"category"` // "addon", "world", "texture", "script", "skin"
+	ThumbnailURL  string   `json:"thumbnailUrl"`
+	DownloadURL   string   `json:"downloadUrl"`
+	DownloadCount string   `json:"downloadCount"`
+	Rating        string   `json:"rating"`
+	UpdatedDate   string   `json:"updatedDate"`
+	SizeBytes     int64    `json:"sizeBytes"`
+	SizeFormatted string   `json:"sizeFormatted"`
+	Type          string   `json:"type"` // "mcaddon", "mcpack", "mcworld", "zip"
+	IsInstalled   bool     `json:"isInstalled"`
+	Tags          []string `json:"tags"`
+	FileCount     int      `json:"fileCount"`
+}
+
+// MCPEDLDownloadFile represents an individual downloadable file from an MCPEDL submission
+type MCPEDLDownloadFile struct {
+	Name          string `json:"name"`
+	FileName      string `json:"fileName"`
+	DownloadURL   string `json:"downloadUrl"`
+	SizeFormatted string `json:"sizeFormatted"`
+	Type          string `json:"type"` // "mcaddon", "mcpack", "mcworld", "zip"
+}
+
+// MCPEDLCatalogResponse wraps paginated MCPEDL results
+type MCPEDLCatalogResponse struct {
+	Items      []MCPEDLCatalogItem `json:"items"`
+	TotalCount int                 `json:"totalCount"`
+	Page       int                 `json:"page"`
+	PageSize   int                 `json:"pageSize"`
 }
 
 // MarketplaceUpdateReport holds dynamic update information for the Marketplace (Addons Manager) extension

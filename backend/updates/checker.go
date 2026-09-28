@@ -206,17 +206,6 @@ func (e *UpdateCheckerEngine) CheckAllUpdates(ctx context.Context, serverID stri
 	}
 
 	// 3. Check LeviLamina Loader Update (Live from GitHub releases & Bedrinth index)
-	var currentLLVersion string
-	if s != nil {
-		currentLLVersion = e.llMgr.DetectVersion(s.Path)
-		if currentLLVersion == "" || currentLLVersion == "Not Installed" {
-			currentLLVersion = s.LeviLaminaVersion
-		}
-	}
-	if currentLLVersion == "" {
-		currentLLVersion = "Not Installed"
-	}
-
 	latestLLVersion := "26.51.5"
 	if llPkg, ok := catalogByTooth["github.com/litedev/levilamina"]; ok && len(llPkg.Versions) > 0 {
 		latestLLVersion = llPkg.Versions[0]
@@ -234,8 +223,23 @@ func (e *UpdateCheckerEngine) CheckAllUpdates(ctx context.Context, serverID stri
 		llReleaseNotes = ghRel.Body
 	}
 
+	var currentLLVersion string
+	if s != nil {
+		currentLLVersion = e.llMgr.DetectVersion(s.Path)
+		if currentLLVersion == "" || currentLLVersion == "Not Installed" || strings.EqualFold(currentLLVersion, "Latest") {
+			if e.llMgr.IsInstalled(s.Path) {
+				currentLLVersion = latestLLVersion
+			} else if s.LeviLaminaVersion != "" && !strings.EqualFold(s.LeviLaminaVersion, "Latest") {
+				currentLLVersion = s.LeviLaminaVersion
+			}
+		}
+	}
+	if currentLLVersion == "" {
+		currentLLVersion = "Not Installed"
+	}
+
 	llHasUpdate := false
-	if currentLLVersion != "Not Installed" && currentLLVersion != "None" && latestLLVersion != "" {
+	if currentLLVersion != "Not Installed" && currentLLVersion != "None" && !strings.EqualFold(currentLLVersion, "Latest") && latestLLVersion != "" {
 		if CompareSemver(latestLLVersion, currentLLVersion) > 0 {
 			llHasUpdate = true
 		}
@@ -419,10 +423,23 @@ func (e *UpdateCheckerEngine) ApplyUpdate(ctx context.Context, serverPath string
 	switch strings.ToUpper(compType) {
 	case "LOADER":
 		tooth := "github.com/LiteLDev/LeviLamina"
-		if targetVersion != "" && targetVersion != "latest" {
-			tooth = tooth + "@" + targetVersion
+		// 1. Try update first (handles already-installed packages properly)
+		res, err := e.lipClient.UpdatePackage(ctx, serverPath, tooth)
+		if err == nil && res != nil && res.Success {
+			return res, nil
 		}
-		return e.lipClient.InstallPackage(ctx, serverPath, tooth)
+		// 2. If update didn't succeed, try lip install without invalid @version syntax
+		resInstall, errInstall := e.lipClient.InstallPackage(ctx, serverPath, tooth)
+		if errInstall == nil && resInstall != nil && resInstall.Success {
+			return resInstall, nil
+		}
+		if res != nil && res.Success {
+			return res, nil
+		}
+		if errInstall != nil {
+			return resInstall, errInstall
+		}
+		return res, err
 
 	case "TOOL":
 		out, err := e.lipClient.InstallLipBinary()
@@ -433,8 +450,12 @@ func (e *UpdateCheckerEngine) ApplyUpdate(ctx context.Context, serverPath string
 
 	case "MOD":
 		tooth := identifier
-		if targetVersion != "" && targetVersion != "latest" {
-			tooth = tooth + "@" + targetVersion
+		if idx := strings.Index(tooth, "@"); idx != -1 {
+			tooth = tooth[:idx]
+		}
+		res, err := e.lipClient.UpdatePackage(ctx, serverPath, tooth)
+		if err == nil && res != nil && res.Success {
+			return res, nil
 		}
 		return e.lipClient.InstallPackage(ctx, serverPath, tooth)
 

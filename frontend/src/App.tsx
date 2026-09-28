@@ -31,6 +31,7 @@ import { ImportCenter } from './pages/ImportCenter';
 import { Extensions } from './pages/Extensions';
 import { ToolCoinPage } from './pages/ToolCoinPage';
 import { CurseForgePage } from './pages/CurseForgePage';
+import { MCPEDLPage } from './pages/MCPEDLPage';
 import { Settings } from './pages/Settings';
 import { About } from './pages/About';
 import { Logs } from './pages/Logs';
@@ -605,6 +606,13 @@ export const App: React.FC = () => {
 
             {currentPage === 'curseforge' && (
               <CurseForgePage
+                server={activeServer}
+                onNavigatePage={handleNavigatePage}
+              />
+            )}
+
+            {currentPage === 'mcpedl' && (
+              <MCPEDLPage
                 server={activeServer}
                 onNavigatePage={handleNavigatePage}
               />

@@ -6,6 +6,7 @@ import {compatibility} from '../models';
 import {backend} from '../models';
 import {server} from '../models';
 import {addons} from '../models';
+import {context} from '../models';
 
 export function AddAllowlistPlayer(arg1:string,arg2:string,arg3:string,arg4:boolean):Promise<void>;
 
@@ -65,6 +66,8 @@ export function EnableLoopbackExemption():Promise<string>;
 
 export function EnableMod(arg1:string):Promise<void>;
 
+export function ExitApp():Promise<void>;
+
 export function ExportAddon(arg1:string,arg2:string):Promise<string>;
 
 export function FixNetworkAndJoinIssues(arg1:string):Promise<models.JoinHealthReport>;
@@ -88,6 +91,10 @@ export function GetDefaultServerLocation(arg1:string):Promise<string>;
 export function GetExtensionsCatalog():Promise<Array<models.ExtensionManifest>>;
 
 export function GetExtensionsOverview(arg1:string,arg2:string):Promise<models.ExtensionsOverview>;
+
+export function GetMCPEDLCatalogLive(arg1:string,arg2:string,arg3:string,arg4:number,arg5:number):Promise<models.MCPEDLCatalogResponse>;
+
+export function GetMCPEDLItemFiles(arg1:string):Promise<Array<models.MCPEDLDownloadFile>>;
 
 export function GetModConfig(arg1:string):Promise<Record<string, any>>;
 
@@ -138,6 +145,8 @@ export function InstallExtension(arg1:string):Promise<void>;
 export function InstallLip():Promise<string>;
 
 export function InstallLipPackage(arg1:string,arg2:string):Promise<lip.CommandResult>;
+
+export function InstallMCPEDLItemLive(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
 export function InstallToolCoinCatalogItem(arg1:string,arg2:string):Promise<void>;
 
@@ -217,6 +226,8 @@ export function SetPreference(arg1:string,arg2:string):Promise<void>;
 
 export function SetServerMemoryLimit(arg1:string,arg2:number):Promise<void>;
 
+export function Shutdown(arg1:context.Context):Promise<void>;
+
 export function StartServer(arg1:string):Promise<void>;
 
 export function StartXboxDeviceAuth():Promise<models.DeviceAuthResponse>;
@@ -224,6 +235,8 @@ export function StartXboxDeviceAuth():Promise<models.DeviceAuthResponse>;
 export function StopServer(arg1:string):Promise<void>;
 
 export function SyncBedrinthCatalog():Promise<number>;
+
+export function SyncMCPEDLCatalog():Promise<models.MCPEDLCatalogResponse>;
 
 export function ToggleAddonForWorld(arg1:string,arg2:string,arg3:string,arg4:boolean):Promise<void>;
 

@@ -119,6 +119,7 @@ export interface ServerMetrics {
   pid: number;
   cpuPercent: number;
   memoryMB: number;
+  totalSystemMemMB?: number;
   uptimeSeconds: number;
   playerCount: number;
   maxPlayers: number;
@@ -387,6 +388,42 @@ export interface CurseForgeCatalogResponse {
 
 export interface ToolCoinCatalogResponse {
   items: ToolCoinCatalogItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface MCPEDLCatalogItem {
+  id: string;
+  slug: string;
+  name: string;
+  summary: string;
+  author: string;
+  version: string;
+  category: string;
+  thumbnailUrl: string;
+  downloadUrl: string;
+  downloadCount: string;
+  rating: string;
+  updatedDate: string;
+  sizeBytes: number;
+  sizeFormatted: string;
+  type: string;
+  isInstalled: boolean;
+  tags: string[];
+  fileCount: number;
+}
+
+export interface MCPEDLDownloadFile {
+  name: string;
+  fileName: string;
+  downloadUrl: string;
+  sizeFormatted: string;
+  type: string;
+}
+
+export interface MCPEDLCatalogResponse {
+  items: MCPEDLCatalogItem[];
   totalCount: number;
   page: number;
   pageSize: number;

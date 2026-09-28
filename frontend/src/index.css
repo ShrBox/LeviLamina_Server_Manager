@@ -677,3 +677,22 @@ input[type="range"].custom-slider::-moz-range-thumb {
   box-shadow: 0 0 12px rgba(var(--brand-500), 0.6);
   transition: transform 0.15s ease;
 }
+
+@keyframes download-bar-stripes {
+  0% {
+    background-position: 1rem 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes download-bar-pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+

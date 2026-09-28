@@ -4,6 +4,7 @@ import {
   Coins, 
   ShoppingBag,
   Flame, 
+  Compass,
   Download, 
   CheckCircle2, 
   Check, 
@@ -19,6 +20,7 @@ import {
 import { Api } from '../services/api';
 import { Server, ExtensionManifest } from '../types';
 import { useI18n } from '../i18n';
+import { InstallButton } from '../components/InstallButton';
 
 interface ExtensionsProps {
   server: Server | null;
@@ -172,38 +174,71 @@ export const Extensions: React.FC<ExtensionsProps> = ({ server, onNavigatePage }
       </div>
 
       {/* Extensions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-settle">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-settle">
         {manifests.map((ext, idx) => {
           const isToolCoin = ext.id === 'toolcoin';
           const isCurseForge = ext.id === 'curseforge';
+          const isMCPEDL = ext.id === 'mcpedl';
           const isBusy = actionLoadingId === ext.id;
+
+          const themeBorder = ext.isEnabled
+            ? isToolCoin 
+              ? 'border-amber-500/40 hover:border-amber-500/60' 
+              : isCurseForge
+                ? 'border-orange-500/40 hover:border-orange-500/60'
+                : 'border-emerald-500/40 hover:border-emerald-500/60'
+            : 'border-dark-750 hover:border-slate-600';
+
+          const themeGlow = isToolCoin 
+            ? 'bg-amber-500/10' 
+            : isCurseForge 
+              ? 'bg-orange-500/10' 
+              : 'bg-emerald-500/10';
+
+          const themeIconBox = isToolCoin 
+            ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' 
+            : isCurseForge 
+              ? 'bg-orange-500/15 border-orange-500/30 text-orange-400' 
+              : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400';
+
+          const themeVersionBadge = isToolCoin
+            ? 'bg-amber-400/15 text-amber-400 border-amber-400/30'
+            : isCurseForge
+              ? 'bg-orange-400/15 text-orange-400 border-orange-400/30'
+              : 'bg-emerald-400/15 text-emerald-400 border-emerald-400/30';
+
+          const themePrimaryBtn = isToolCoin
+            ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-amber-500/20'
+            : isCurseForge
+              ? 'bg-orange-500 hover:bg-orange-600 text-slate-950 shadow-orange-500/20'
+              : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/20';
+
+          const openTabLabel = isToolCoin
+            ? t('openMarketplaceTab', 'Open Marketplace Tab')
+            : isCurseForge
+              ? t('openCurseForgeTab', 'Open CurseForge Tab')
+              : t('openMCPEDLTab', 'Open MCPEDL Tab');
 
           return (
             <div
               key={ext.id}
-              className={`bg-dark-850 rounded-2xl border p-6 space-y-5 transition-all flex flex-col justify-between group shadow-lg animate-spring-pop relative overflow-hidden ${
-                ext.isEnabled
-                  ? isToolCoin 
-                    ? 'border-amber-500/40 hover:border-amber-500/60' 
-                    : 'border-orange-500/40 hover:border-orange-500/60'
-                  : 'border-dark-750 hover:border-slate-600'
-              }`}
+              className={`bg-dark-850 rounded-2xl border p-6 space-y-5 transition-all flex flex-col justify-between group shadow-lg animate-spring-pop relative overflow-hidden ${themeBorder}`}
               style={{ animationDelay: `${idx * 60}ms` }}
             >
               {/* Background Glow */}
-              <div className={`absolute top-0 right-0 w-36 h-36 rounded-full blur-3xl pointer-events-none transition-colors ${
-                isToolCoin ? 'bg-amber-500/10' : 'bg-orange-500/10'
-              }`} />
+              <div className={`absolute top-0 right-0 w-36 h-36 rounded-full blur-3xl pointer-events-none transition-colors ${themeGlow}`} />
 
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3.5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md border ${
-                      isToolCoin 
-                        ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' 
-                        : 'bg-orange-500/15 border-orange-500/30 text-orange-400'
-                    }`}>
-                      {isToolCoin ? <ShoppingBag size={26} /> : <Flame size={26} />}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md border ${themeIconBox}`}>
+                      {isToolCoin ? (
+                        <ShoppingBag size={26} />
+                      ) : isCurseForge ? (
+                        <Flame size={26} />
+                      ) : (
+                        <Compass size={26} />
+                      )}
                     </div>
 
                     <div>
@@ -211,11 +246,7 @@ export const Extensions: React.FC<ExtensionsProps> = ({ server, onNavigatePage }
                         <h2 className="text-base font-black text-white">
                           {ext.name}
                         </h2>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
-                          isToolCoin
-                            ? 'bg-amber-400/15 text-amber-400 border-amber-400/30'
-                            : 'bg-orange-400/15 text-orange-400 border-orange-400/30'
-                        }`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${themeVersionBadge}`}>
                           v{ext.version}
                         </span>
                       </div>
@@ -266,13 +297,9 @@ export const Extensions: React.FC<ExtensionsProps> = ({ server, onNavigatePage }
                     <button
                       type="button"
                       onClick={() => onNavigatePage && onNavigatePage(ext.id)}
-                      className={`flex-1 py-2.5 px-4 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer ${
-                        isToolCoin
-                          ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-amber-500/20'
-                          : 'bg-orange-500 hover:bg-orange-600 text-slate-950 shadow-orange-500/20'
-                      }`}
+                      className={`flex-1 py-2.5 px-4 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer ${themePrimaryBtn}`}
                     >
-                      <span>{isToolCoin ? t('openMarketplaceTab', 'Open Marketplace Tab') : t('openCurseForgeTab', 'Open CurseForge Tab')}</span>
+                      <span>{openTabLabel}</span>
                       <ArrowRight size={14} />
                     </button>
 
@@ -309,19 +336,15 @@ export const Extensions: React.FC<ExtensionsProps> = ({ server, onNavigatePage }
                     </button>
                   </>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleInstall(ext.id, ext.name)}
-                    disabled={isBusy}
-                    className={`w-full py-2.5 px-4 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer disabled:opacity-50 ${
-                      isToolCoin
-                        ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-amber-500/20'
-                        : 'bg-orange-500 hover:bg-orange-600 text-slate-950 shadow-orange-500/20'
-                    }`}
-                  >
-                    {isBusy ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
-                    <span>{t('installAndEnableExtension', 'Download & Enable Extension')}</span>
-                  </button>
+                  <InstallButton
+                    isInstalling={isBusy}
+                    onInstall={() => handleInstall(ext.id, ext.name)}
+                    label={t('installAndEnableExtension', 'Download & Enable Extension')}
+                    installingLabel={t('downloadingInstalling', 'Downloading & Installing...')}
+                    variant={ext.id === 'curseforge' ? 'orange' : ext.id === 'mcpedl' ? 'emerald' : ext.id === 'toolcoin' ? 'amber' : 'brand'}
+                    size="lg"
+                    className="w-full"
+                  />
                 )}
               </div>
             </div>
