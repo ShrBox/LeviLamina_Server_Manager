@@ -1,0 +1,30 @@
+# Binaries and build outputs
+build/bin/
+build/test-*
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Node modules & frontend dist
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+
+# System and runtime files
+.llsm/
+*.tmp
+*.log
+Thumbs.db
+.DS_Store
+
+# IDE and Editor configurations
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*~

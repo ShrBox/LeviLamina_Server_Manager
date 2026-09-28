@@ -1,0 +1,679 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --brand-500: 0 208 132;
+  --brand-600: 0 176 112;
+  --brand-accent: 59 130 246;
+
+  /* Default Dark Mode Surfaces */
+  --color-bg-950: 9 10 15;
+  --color-bg-900: 15 17 23;
+  --color-bg-850: 21 24 33;
+  --color-bg-800: 27 31 43;
+  --color-bg-750: 35 40 56;
+  --color-bg-700: 44 51 71;
+  --color-bg-600: 61 70 97;
+
+  /* Default Dark Mode Text/Slate */
+  --color-slate-50: 248 250 252;
+  --color-slate-100: 241 245 249;
+  --color-slate-200: 226 232 240;
+  --color-slate-300: 203 213 225;
+  --color-slate-400: 148 163 184;
+  --color-slate-500: 100 116 139;
+  --color-slate-600: 71 85 105;
+  --color-slate-700: 51 65 85;
+  --color-slate-800: 30 41 59;
+  --color-slate-900: 15 23 42;
+  --color-slate-950: 2 6 23;
+}
+
+html.light-mode {
+  color-scheme: light;
+  /* Bright / White Mode Surfaces - Clean Daylight Palette */
+  --color-bg-950: 243 245 248; /* Outer App Background */
+  --color-bg-900: 255 255 255; /* Main Sidebar & Primary Panels */
+  --color-bg-850: 248 250 252; /* Card Surfaces */
+  --color-bg-800: 238 242 246; /* Input Boxes & Elevated Chips */
+  --color-bg-750: 226 232 240; /* Dividers & Soft Borders */
+  --color-bg-700: 203 213 225; /* Visible Borders */
+  --color-bg-600: 148 163 184; /* Active/Selected Borders */
+
+  /* Bright Mode Text - Crisp High-Contrast Typography */
+  --color-slate-50: 15 23 42;
+  --color-slate-100: 15 23 42;    /* Headings */
+  --color-slate-200: 30 41 59;    /* Primary Text */
+  --color-slate-300: 51 65 85;    /* Secondary Text */
+  --color-slate-400: 100 116 139; /* Muted Captions */
+  --color-slate-500: 148 163 184; /* Disabled / Ghost Text */
+  --color-slate-600: 203 213 225;
+  --color-slate-700: 226 232 240;
+  --color-slate-800: 241 245 249;
+  --color-slate-900: 248 250 252;
+  --color-slate-950: 255 255 255;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  cursor: default;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-950 text-slate-200 antialiased transition-colors duration-200;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Arabic Typography with Tajawal Font - Applied solely when Arabic is active or on Arabic elements */
+:root[lang="ar"],
+[lang="ar"],
+html[dir="rtl"],
+body.lang-ar,
+.font-arabic {
+  font-family: 'Tajawal', system-ui, -apple-system, sans-serif !important;
+}
+
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+html[dir="rtl"] .font-mono,
+html[dir="rtl"] code,
+html[dir="rtl"] pre {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Custom sleek scrollbar for logs and cards */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 17, 23, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(61, 70, 97, 0.6);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+/* LeviLamina Launcher Aesthetics & Micro-Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(var(--brand-500), 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(var(--brand-500), 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(var(--brand-500), 0);
+  }
+}
+
+@keyframes shimmerEffect {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-in {
+  animation: modalZoomIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pulse-glow-ring {
+  animation: pulseRing 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+button:active, .interactive-press:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease-in-out;
+}
+
+.glass-panel {
+  background: rgba(18, 22, 32, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(44, 51, 71, 0.55);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(var(--brand-500), 0.45);
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.4), 0 0 25px rgba(var(--brand-500), 0.12);
+  transform: translateY(-2px);
+}
+
+.launcher-card {
+  background: linear-gradient(135deg, rgba(26, 32, 48, 0.7) 0%, rgba(16, 20, 30, 0.85) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.launcher-card:hover {
+  border-color: rgba(var(--brand-500), 0.35);
+  box-shadow: 0 14px 40px -5px rgba(0, 0, 0, 0.5), 0 0 25px rgba(var(--brand-500), 0.09);
+  transform: translateY(-2px);
+}
+
+.launcher-hero-button {
+  background: linear-gradient(135deg, rgb(var(--brand-500)) 0%, rgb(var(--brand-600)) 100%);
+  box-shadow: 0 8px 25px -4px rgba(var(--brand-500), 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.launcher-hero-button:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 12px 35px -2px rgba(var(--brand-500), 0.6);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, rgba(var(--brand-500), 0.8) 50%, #fff 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  animation: shimmerEffect 4s linear infinite;
+}
+
+/* Light Mode Overrides */
+html.light-mode .glass-panel {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+html.light-mode .glass-panel-hover:hover {
+  border-color: rgba(var(--brand-500), 0.5);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08), 0 0 20px rgba(var(--brand-500), 0.15);
+}
+
+html.light-mode .launcher-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.06);
+}
+
+html.light-mode .launcher-card:hover {
+  border-color: rgba(var(--brand-500), 0.45);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.1), 0 0 20px rgba(var(--brand-500), 0.12);
+}
+
+html.light-mode ::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+html.light-mode ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+html.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.7);
+}
+
+html.light-mode .shimmer-text {
+  background: linear-gradient(90deg, #0f172a 0%, rgba(var(--brand-500), 0.9) 50%, #0f172a 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  animation: shimmerEffect 4s linear infinite;
+}
+
+/* Invert raw text-white on light mode backgrounds so text is always high contrast */
+html.light-mode .text-white:not(button):not(.launcher-hero-button):not([class*="bg-rose"]):not([class*="bg-brand"]):not([class*="bg-emerald"]):not([class*="bg-amber"]):not([class*="bg-indigo"]):not([class*="bg-cyan"]):not([class*="bg-purple"]):not([class*="bg-blue"]):not([class*="bg-gradient"]) {
+  color: rgb(var(--color-slate-100)) !important;
+}
+
+/* Universal Themed Select & Dropdown Lists */
+select {
+  color-scheme: dark;
+  background-color: rgb(var(--color-bg-900)) !important;
+  color: rgb(var(--color-slate-100)) !important;
+  border: 1px solid rgb(var(--color-bg-750)) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.375rem 0.75rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: rgba(var(--brand-500), 0.7) !important;
+  box-shadow: 0 0 0 1px rgba(var(--brand-500), 0.3);
+}
+
+select option {
+  background-color: rgb(var(--color-bg-900)) !important;
+  color: rgb(var(--color-slate-100)) !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+select option:checked {
+  background-color: rgba(var(--brand-500), 0.2) !important;
+  color: rgb(var(--brand-500)) !important;
+  font-weight: bold;
+}
+
+html.light-mode select {
+  color-scheme: light;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+html.light-mode select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html.light-mode select option:checked {
+  background-color: rgba(var(--brand-500), 0.15) !important;
+  color: rgb(var(--brand-600)) !important;
+}
+
+/* CustomSelect Theming & Light-Mode Integration */
+html.light-mode .custom-select-trigger {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.light-mode .custom-select-trigger:hover {
+  border-color: rgba(var(--brand-500), 0.6) !important;
+}
+
+html.light-mode .custom-select-menu {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-mode .custom-select-option {
+  color: #334155 !important;
+}
+
+html.light-mode .custom-select-option:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html.light-mode .custom-select-option.is-selected {
+  background-color: rgba(var(--brand-500), 0.12) !important;
+  color: rgb(var(--brand-600)) !important;
+  border-color: rgba(var(--brand-500), 0.3) !important;
+}
+
+@keyframes progress-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.mod-progress-bar {
+  animation: progress-bar 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Floating Wizard Widget */
+.floating-wizard-card {
+  background-color: rgba(21, 24, 33, 0.95);
+  border-color: rgba(var(--brand-500), 0.7);
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(var(--brand-500), 0.2);
+}
+
+html.light-mode .floating-wizard-card {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.18), 0 0 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light-mode .floating-wizard-card .floating-wizard-title {
+  color: #0f172a !important;
+}
+
+html.light-mode .floating-wizard-card .floating-wizard-desc {
+  color: #475569 !important;
+}
+
+/* Frameless Window Drag Regions */
+.wails-drag {
+  --wails-draggable: drag;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.wails-no-drag {
+  --wails-draggable: no-drag;
+  -webkit-app-region: no-drag;
+}
+
+/* TitleBar Surface Themes */
+.app-titlebar {
+  background-color: rgb(15 17 23);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+html.light-mode .app-titlebar {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Toast Notification Countdown & Animations */
+@keyframes toastCountdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Toast Card Light-Mode Theming */
+html.light-mode .toast-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.06) !important;
+}
+
+html.light-mode .toast-card p {
+  color: #1e293b !important;
+}
+
+html.light-mode .toast-card span.toast-title {
+  color: #0f172a !important;
+}
+
+/* Launcher Page, Tab & Element Entrance Animations (Fluid LeviLauncher Motion) */
+@keyframes launcherPageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-page-enter {
+  animation: launcherPageEnter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes launcherTabEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-tab-enter {
+  animation: launcherTabEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered Element Settle Motion: Cards float up and spring into place */
+@keyframes elementSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.975);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.004);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-settle {
+  animation: elementSettle 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-settle > * {
+  animation: elementSettle 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-settle > *:nth-child(1) { animation-delay: 0.04s; }
+.stagger-settle > *:nth-child(2) { animation-delay: 0.09s; }
+.stagger-settle > *:nth-child(3) { animation-delay: 0.14s; }
+.stagger-settle > *:nth-child(4) { animation-delay: 0.19s; }
+.stagger-settle > *:nth-child(5) { animation-delay: 0.24s; }
+.stagger-settle > *:nth-child(6) { animation-delay: 0.29s; }
+.stagger-settle > *:nth-child(7) { animation-delay: 0.34s; }
+.stagger-settle > *:nth-child(8) { animation-delay: 0.39s; }
+.stagger-settle > *:nth-child(9) { animation-delay: 0.44s; }
+.stagger-settle > *:nth-child(10) { animation-delay: 0.49s; }
+.stagger-settle > *:nth-child(11) { animation-delay: 0.54s; }
+.stagger-settle > *:nth-child(12) { animation-delay: 0.59s; }
+
+/* Multi-directional Dynamic Element Entrances (LeviLauncher Fluid Physics) */
+@keyframes slideFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideFromTop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-left {
+  animation: slideFromLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-right {
+  animation: slideFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes springPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-spring-pop {
+  animation: springPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes cardPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-pop {
+  animation: cardPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Universal Refresh Button Interactive Micro-Animation */
+button:hover svg.lucide-rotate-cw:not(.animate-spin),
+button:hover .lucide-rotate-cw:not(.animate-spin) {
+  transform: rotate(180deg);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+button:active svg.lucide-rotate-cw:not(.animate-spin),
+button:active .lucide-rotate-cw:not(.animate-spin) {
+  transform: rotate(360deg);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Radial Wizard Progress Glowing Ring */
+@keyframes radarOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-orbit {
+  animation: radarOrbit 3s linear infinite;
+}
+
+/* Modern Theme-Adaptive Range Slider */
+input[type="range"].custom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+input[type="range"].custom-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--slider-track, #1e2433);
+  transition: background 0.1s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+input[type="range"].custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: rgb(var(--brand-500));
+  border: 3px solid #0b0f17;
+  box-shadow: 0 0 12px rgba(var(--brand-500), 0.6), 0 2px 5px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"].custom-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.18);
+  box-shadow: 0 0 16px rgba(var(--brand-500), 0.85), 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+input[type="range"].custom-slider:active::-webkit-slider-thumb {
+  transform: scale(1.28);
+  box-shadow: 0 0 22px rgba(var(--brand-500), 1), 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+input[type="range"].custom-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--slider-track, #1e2433);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+input[type="range"].custom-slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: rgb(var(--brand-500));
+  border: 3px solid #0b0f17;
+  box-shadow: 0 0 12px rgba(var(--brand-500), 0.6);
+  transition: transform 0.15s ease;
+}
