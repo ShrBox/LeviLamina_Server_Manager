@@ -113,7 +113,7 @@ export const About: React.FC<AboutProps> = ({ onNavigatePage }) => {
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5 truncate">
-                    LeviLauncher Author & LiteLDev Core Developer
+                    LeviLamina_Server_Manager Author
                   </p>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export const About: React.FC<AboutProps> = ({ onNavigatePage }) => {
                 Discord Community
               </h4>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                Join the official LiteLDev & LeviLamina Discord server
+                Join the official LeviMC & LeviLamina Discord server
               </p>
             </div>
           </div>
