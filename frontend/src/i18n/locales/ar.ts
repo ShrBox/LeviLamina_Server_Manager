@@ -686,7 +686,6 @@ export const ar: Record<string, string> = {
   "sidebar.expand": "توسيع الشريط الجانبي",
   "sidebar.collapse": "طي الشريط الجانبي",
   "about.subtitle": "منظومة LeviLamina و LIP و Minecraft Bedrock",
-  "about.rhymcDesc": "بنية تحتية سحابية عالية الأداء لسيرفرات Minecraft Bedrock",
   "about.website": "الموقع الإلكتروني",
   "about.bdsRuntimeDesc": "بيئة تشغيل محرك السيرفر الرسمي",
   "about.starFork": "نجمة / تفريع (Star / Fork)",

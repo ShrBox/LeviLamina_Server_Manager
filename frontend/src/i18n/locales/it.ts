@@ -682,7 +682,6 @@ export const it: Record<string, string> = {
   "sidebar.expand": "Espandi barra laterale",
   "sidebar.collapse": "Comprimi barra laterale",
   "about.subtitle": "Ecosistema LeviLamina, LIP e Minecraft Bedrock",
-  "about.rhymcDesc": "Infrastruttura server cloud ad alte prestazioni per Minecraft Bedrock",
   "about.website": "Sito web",
   "about.bdsRuntimeDesc": "Runtime ufficiale del motore server",
   "about.starFork": "Star / Fork",

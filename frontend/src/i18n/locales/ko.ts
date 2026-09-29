@@ -682,7 +682,6 @@ export const ko: Record<string, string> = {
   "sidebar.expand": "사이드바 확장",
   "sidebar.collapse": "사이드바 접기",
   "about.subtitle": "LeviLamina, LIP 및 Minecraft Bedrock 생태계",
-  "about.rhymcDesc": "고성능 Minecraft Bedrock 클라우드 서버 인프라",
   "about.website": "웹사이트",
   "about.bdsRuntimeDesc": "공식 서버 엔진 런타임",
   "about.starFork": "Star / Fork",

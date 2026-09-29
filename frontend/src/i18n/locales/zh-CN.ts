@@ -682,7 +682,6 @@ export const zhCN: Record<string, string> = {
   "sidebar.expand": "展开侧边栏",
   "sidebar.collapse": "折叠侧边栏",
   "about.subtitle": "LeviLamina、LIP 与 Minecraft Bedrock 生态系统",
-  "about.rhymcDesc": "高性能 Minecraft Bedrock 云服务器基础设施",
   "about.website": "官方网站",
   "about.bdsRuntimeDesc": "官方服务器引擎运行时",
   "about.starFork": "Star / Fork 项目",

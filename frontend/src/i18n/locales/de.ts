@@ -682,7 +682,6 @@ export const de: Record<string, string> = {
   "sidebar.expand": "Seitenleiste erweitern",
   "sidebar.collapse": "Seitenleiste einklappen",
   "about.subtitle": "LeviLamina, LIP & Minecraft Bedrock Ökosystem",
-  "about.rhymcDesc": "Hochleistungs-Cloud-Server-Infrastruktur für Minecraft Bedrock",
   "about.website": "Webseite",
   "about.bdsRuntimeDesc": "Offizielle Server-Engine-Laufzeitumgebung",
   "about.starFork": "Star / Fork",

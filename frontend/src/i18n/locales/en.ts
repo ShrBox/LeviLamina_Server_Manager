@@ -686,7 +686,6 @@ export const en: Record<string, string> = {
   "sidebar.expand": "Expand sidebar",
   "sidebar.collapse": "Collapse sidebar",
   "about.subtitle": "LeviLamina, LIP & Minecraft Bedrock Ecosystem",
-  "about.rhymcDesc": "High performance Minecraft Bedrock cloud server infrastructure",
   "about.website": "Website",
   "about.bdsRuntimeDesc": "Official server engine runtime",
   "about.starFork": "Star / Fork",

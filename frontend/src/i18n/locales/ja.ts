@@ -682,7 +682,6 @@ export const ja: Record<string, string> = {
   "sidebar.expand": "サイドバーを展開",
   "sidebar.collapse": "サイドバーを折りたたむ",
   "about.subtitle": "LeviLamina、LIP および Minecraft Bedrock エコシステム",
-  "about.rhymcDesc": "高性能な Minecraft Bedrock クラウドサーバーインフラ",
   "about.website": "ウェブサイト",
   "about.bdsRuntimeDesc": "公式サーバーエンジンランタイム",
   "about.starFork": "Star / Fork",

@@ -682,7 +682,6 @@ export const ru: Record<string, string> = {
   "sidebar.expand": "Развернуть боковую панель",
   "sidebar.collapse": "Свернуть боковую панель",
   "about.subtitle": "Экосистема LeviLamina, LIP и Minecraft Bedrock",
-  "about.rhymcDesc": "Высокопроизводительная облачная серверная инфраструктура Minecraft Bedrock",
   "about.website": "Веб-сайт",
   "about.bdsRuntimeDesc": "Официальная среда выполнения серверного движка",
   "about.starFork": "Star / Fork",

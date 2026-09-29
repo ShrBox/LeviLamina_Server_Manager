@@ -682,7 +682,6 @@ export const zhTW: Record<string, string> = {
   "sidebar.expand": "展開側邊欄",
   "sidebar.collapse": "摺疊側邊欄",
   "about.subtitle": "LeviLamina、LIP 與 Minecraft Bedrock 生態系統",
-  "about.rhymcDesc": "高性能 Minecraft Bedrock 雲端伺服器基礎設施",
   "about.website": "官方網站",
   "about.bdsRuntimeDesc": "官方伺服器引擎執行時期",
   "about.starFork": "Star / Fork 專案",
